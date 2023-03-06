@@ -33,11 +33,7 @@ public class BaseAddressSolver {
     public static long getBaseAddressWithConstraint(Program program) throws IOException, VersionException, CancelledException,
             DuplicateNameException, InvalidNameException {
 
-        String projectDirectoryName = Constant.DIRECTORY_NAME;
-        Set<Long> result = new HashSet<>();
-
         // Analyze the loaded binary file
-        int txId = program.startTransaction("Analysis");
         AutoAnalysisManager mgr = AutoAnalysisManager.getAnalysisManager(program);
         mgr.initializeOptions();
         mgr.reAnalyzeAll(null);
@@ -60,8 +56,6 @@ public class BaseAddressSolver {
 
 
         // Constraint 2: function prologue
-        long length = program.getMaxAddress().getUnsignedOffset();
-        Address current = program.getMinAddress();
         List<Long> entry = BaseAddressUtil.getFunctionEntries(program);
         Collections.sort(entry);
 
