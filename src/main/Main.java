@@ -1,6 +1,6 @@
 package main;
 
-import base.ExecutionPath;
+import base.ExecutionPath; 
 import core.BaseAddressSolver;
 import core.ExecutionEngine;
 import core.ExecutionPathFinder;
@@ -25,6 +25,7 @@ import ghidra.util.exception.CancelledException;
 import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.exception.VersionException;
 import ghidra.util.task.TimeoutTaskMonitor;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.*;
@@ -45,7 +46,9 @@ public class Main {
         startTime = System.currentTimeMillis();
 
         // Adjust the following
-        String projectDirectoryName = Constant.DIRECTORY_NAME;
+        File projectDir = new File(Constant.DIRECTORY_NAME);
+		projectDir.mkdir();
+		String projectDirectoryName = projectDir.getAbsolutePath();
 
         final boolean DEBUG = false;
         String projectName = "FirmXRay";
@@ -58,7 +61,7 @@ public class Main {
         else {
             projectName = "FirmXRay";
             Constant.MCU = "Nordic";
-            programName = "./examples/Nordic/example_nordic.bin";
+            programName = "./examples/Nordic/ble_app_blinky.bin";
             // programName = "./examples/TI/oad.bin";
         }
         // Define Ghidra components
@@ -94,17 +97,14 @@ public class Main {
         // Initialize tag
         Logger.TAG = program.getName() + "@" + program.getExecutableMD5();
 
-
-        try {
-             getBase(program, Logger.TAG);
-        } catch (Exception e) {
-           Logger.printE(e.toString());
-        }
-
-
         if (Fileutil.isResultExist(Logger.TAG)) { // skip if result already exists
             System.out.println("Result already exist for " + Logger.TAG);
-            return;
+        } else {
+        	try {
+                getBase(program, Logger.TAG);
+           } catch (Exception e) {
+              Logger.printE(e.toString());
+           }
         }
 
         // analyze base address
