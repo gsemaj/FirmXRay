@@ -29,6 +29,8 @@ public class STRInsSolver {
     public static int spCount = 0;
 
     public static int unSolvedCount = 0;
+    
+    public static int solvedCount = 0;
 
     public static void addIns(Address address) {
         allSTRIns.add(address);
@@ -39,6 +41,7 @@ public class STRInsSolver {
     public static void solveAllSTRIns(Program program) {
 
         for (Address address: allSTRIns) {
+        	System.out.println("solving STR " + ++solvedCount + " / " + allSTRIns.size());
             Instruction instruction = program.getListing().getInstructionAt(address); // STR instruction
             String mnem = InstructionUtil.removePostfix(instruction.getMnemonicString());
 

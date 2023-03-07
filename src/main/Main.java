@@ -61,7 +61,7 @@ public class Main {
         else {
             projectName = "FirmXRay";
             Constant.MCU = "Nordic";
-            programName = "./examples/Nordic/ble_app_blinky.bin";
+            programName = "./examples/Nordic/ble_app_pwr_profiling.bin";
             // programName = "./examples/TI/oad.bin";
         }
         // Define Ghidra components
