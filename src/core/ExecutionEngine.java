@@ -92,6 +92,7 @@ public class ExecutionEngine {
     }
 
     public void execute() {
+    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
         Instruction lastIns = path.getLastInst();
         Function insFunction = FunctionUtil.findFunctionWithAddress(program, lastIns.getAddress());
         if (insFunction != null) {
@@ -101,6 +102,7 @@ public class ExecutionEngine {
 
         while(!path.finished()) {
             Instruction nextIns = path.getNextInst();
+            System.out.println(nextIns.getAddressString(false, true) + ":\t" + nextIns);
             executeInst(nextIns);
         }
 
