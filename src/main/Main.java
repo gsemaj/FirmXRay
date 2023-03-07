@@ -1,6 +1,6 @@
 package main;
 
-import base.ExecutionPath; 
+import base.ExecutionPath;  
 import core.BaseAddressSolver;
 import core.ExecutionEngine;
 import core.ExecutionPathFinder;
@@ -12,6 +12,7 @@ import ghidra.base.project.GhidraProject;
 import ghidra.framework.Application;
 import ghidra.framework.ApplicationConfiguration;
 import ghidra.framework.HeadlessGhidraApplicationConfiguration;
+import ghidra.framework.options.Options;
 import ghidra.framework.store.LockException;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOverflowException;
@@ -129,7 +130,7 @@ public class Main {
         // Analyze the loaded binary file
         int txId = program.startTransaction("Analysis");
         AutoAnalysisManager mgr = AutoAnalysisManager.getAnalysisManager(program);
-        mgr.initializeOptions();
+        mgr.initializeOptions(getAnalysisOptions(program));
         mgr.reAnalyzeAll(null);
 
         // The analysis will take sometime.
@@ -246,5 +247,12 @@ public class Main {
         t.setDaemon(true);
         t.start();
     }
+    
+    public static Options getAnalysisOptions(Program program) {
+		Options options = program.getOptions(Program.ANALYSIS_PROPERTIES);
+		options.setBoolean(Constant.OPT_AGGRESSIVE_DECOMP, true);
+		options.setBoolean(Constant.OPT_DECOMP_PARAMETER_ID, true);
+		return options;
+	}
 
 }

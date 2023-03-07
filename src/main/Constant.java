@@ -67,6 +67,10 @@ public class Constant {
     public final static byte STMFD1 = (byte) 0x2D;
     public final static byte STMFD2 = (byte) 0xE9;
     public final static byte E7 = (byte) 0xE7;
+    
+    // Misc
+    public final static String OPT_AGGRESSIVE_DECOMP = "ARM Aggressive Instruction Finder";
+	public final static String OPT_DECOMP_PARAMETER_ID = "Decompiler Parameter ID";
 
 
 
