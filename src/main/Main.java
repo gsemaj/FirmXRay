@@ -171,8 +171,8 @@ public class Main {
 
         // solve all STR instructions
         // enabled when analyzing Nordic firmware because TI ones do not have many dependency on global vars
-        if (Constant.MCU.equals("Nordic"))
-            STRInsSolver.solveAllSTRIns(program);
+        //if (Constant.MCU.equals("Nordic"))
+        //    STRInsSolver.solveAllSTRIns(program);
 
         long pathNum = 0;
 
