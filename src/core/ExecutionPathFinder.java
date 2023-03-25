@@ -227,7 +227,7 @@ public class ExecutionPathFinder {
                     if (!path.taintVariables.contains(rn.getName()))
                         return false; // do not need to taint
                     else {
-                        if (mnem.equals("mov") || mnem.equals("movw") || InstructionUtil.isLDRInstruction(mnem))
+                        if (mnem.equals("mov") || mnem.equals("movw") || mnem.equals("movs") || InstructionUtil.isLDRInstruction(mnem))
                             path.removeTaintVariable(rn.getName()); // remove from taint variable
                         else if (ins.getNumOperands() == 3 && (mnem.equals("add") || mnem.equals("sub") || mnem.equals("mul")))
                             path.removeTaintVariable(rn.getName()); // remove from taint variable

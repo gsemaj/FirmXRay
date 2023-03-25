@@ -113,7 +113,7 @@ public class Constant {
             case SD_BLE_GATTS_SERVICE_ADD:
                 return new ArrayList<>(List.of("r0", "r1"));
             case SD_BLE_GATTS_CHARACTERISTIC_ADD:
-                return new ArrayList<>(List.of("r2", "sp"));
+                return new ArrayList<>(List.of("r1", "r2", "sp"));
             case SD_BLE_GAP_WHITELIST_SET:
                 return new ArrayList<>(List.of("r1"));
             case SD_BLE_UUID_VS_ADD:
