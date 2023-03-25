@@ -223,9 +223,13 @@ public class ExecutionEngine {
             }
         }
     }
-
-
+    
     public long getValueFromOperand(Object[] op, int type, int numByte) {
+    	return getValueFromOperand(op, type, numByte, false);
+    }
+
+
+    public long getValueFromOperand(Object[] op, int type, int numByte, boolean writeBack) {
         int opNum = op.length;
         if (opNum == 1) {
             return getValueSingleOp(op[0], numByte);
@@ -243,6 +247,10 @@ public class ExecutionEngine {
                 long temp = 0;
                 for (int i=0; i<opNum; ++i) {
                     temp += getValueSingleOp(op[i], numByte);
+                }
+                if(writeBack) {
+                	Register r = (Register)op[0];
+                	registers.put(r.getName(), temp);
                 }
                 return getValFromMemory(temp, numByte);
             }
@@ -267,7 +275,7 @@ public class ExecutionEngine {
         }
     }
 
-    public long getValueFromOperand(Object[] op, int type, boolean dereference, int numByte) {
+    public long getValueFromOperand(Object[] op, int type, boolean dereference, int numByte, boolean writeBack) {
         int opNum = op.length;
         if(opNum == 1) {
             return getValueSingleOp(op[0], 4);
@@ -285,6 +293,10 @@ public class ExecutionEngine {
                 long temp = 0;
                 for (int i=0; i<opNum; ++i) {
                     temp += getValueSingleOp(op[i], numByte);
+                }
+                if(writeBack) {
+                	Register r = (Register)op[0];
+                	registers.put(r.getName(), temp);
                 }
                 if (dereference)
                     return getValFromMemory(temp, numByte);
@@ -329,6 +341,7 @@ public class ExecutionEngine {
         Register targetReg;
         Object[] source;
         long byte1, byte2, byte3, byte4;
+        boolean writeBack;
 
         mnem = InstructionUtil.removePostfix(mnem);
 
@@ -613,7 +626,8 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
-                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4);
+                writeBack = ins.toString().endsWith("!");
+                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
 
                 // put 4 bytes according, little endian
                 memory.put(sourceVal, byte1);
@@ -716,8 +730,14 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
-                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4);
+                writeBack = ins.toString().endsWith("!");
+                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
                 regVal &= 0xFF; // only reserve 1 byte, little endian
+                
+                // write back
+                if(ins.toString().endsWith("!")) {
+                	break;
+                }
 
                 memory.put(sourceVal, regVal);
                 break;
@@ -741,7 +761,8 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
-                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4);
+                writeBack = ins.toString().endsWith("!");
+                sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
 
                 // take half word (2 bytes), little endian
                 byte1= regVal & 0xFF;
