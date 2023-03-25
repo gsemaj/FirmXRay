@@ -626,6 +626,7 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
+                patchOps(ins, source);
                 writeBack = ins.toString().endsWith("!");
                 sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
 
@@ -730,14 +731,10 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
+                patchOps(ins, source);
                 writeBack = ins.toString().endsWith("!");
                 sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
                 regVal &= 0xFF; // only reserve 1 byte, little endian
-                
-                // write back
-                if(ins.toString().endsWith("!")) {
-                	break;
-                }
 
                 memory.put(sourceVal, regVal);
                 break;
@@ -761,6 +758,7 @@ public class ExecutionEngine {
 
                 // target memory address
                 source = ins.getOpObjects(1);
+                patchOps(ins, source);
                 writeBack = ins.toString().endsWith("!");
                 sourceVal = getValueFromOperand(source, ins.getOperandType(1), false, 4, writeBack);
 
@@ -858,6 +856,20 @@ public class ExecutionEngine {
             default:
                 Logger.printW("Unhandled operation: " + mnem);
 
+        }
+    }
+    
+    /**
+     * Hack to handle negative offsets in register addressing
+     * @param ins the instruction
+     * @param source array of operands
+     */
+    private static void patchOps(Instruction ins, Object[] source)
+    {
+    	// hack for negative scalar operand
+        if(ins.toString().contains("#-") && source[1] instanceof Scalar) {
+        	Scalar originalScalar = (Scalar)source[1];
+        	source[1] = new Scalar(originalScalar.bitLength(), -originalScalar.getUnsignedValue(), true);
         }
     }
 }
