@@ -45,7 +45,7 @@ public class ExecutionPath {
     public Instruction getLastInst() {return path.get(currentInstIndex-1);}
 
     public void addTaintVariable(String v) {
-        if (!taintVariables.contains(v) && !v.equals("lr")) {
+        if (!taintVariables.contains(v)) {
             taintVariables.add(v);
         }
     }
@@ -67,18 +67,20 @@ public class ExecutionPath {
     public Instruction getFirstIns() {
         return path.get(0);
     }
+    
+    public boolean checkTaint(List<String> vars) {
+    	for(String var : vars) {
+    		// only sp left is ok
+    		if(!var.equals("sp"))
+    			return false;
+    	}
+    	return true;
+    }
 
     public boolean isTaintFinish() {
         if (taintVariables.size() > 0) {
-            if (taintVariables.size() == 1 && taintVariables.get(0).equals("sp")) {
-                // only sp left is ok
-                if (this.getLastInst().getMnemonicString().equals("push")) // reach beginning of function
-                    return true;
-                else
-                    return false;
-            }
-            else
-                return false;
+        	return checkTaint(taintVariables)
+        			&& getLastInst().getMnemonicString().equals("push");
         }
         else {
             return true;
