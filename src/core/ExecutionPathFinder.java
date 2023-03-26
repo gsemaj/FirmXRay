@@ -363,9 +363,21 @@ public class ExecutionPathFinder {
             case "pop":
                 return true;
 
-            case "b":
             case "bl":
                 // unconditional branch
+            	// only taint instr + args if possible memset
+            	Address addr = (Address)(ins.getOpObjects(0)[0]);
+            	Function fun = FunctionUtil.findFunctionWithAddress(program, addr);
+            	if(fun != null) {
+            		if(FunctionUtil.isMemsetCandidate(fun)) {
+            			path.addTaintVariable("r0"); // address
+            			path.addTaintVariable("r1"); // value
+            			path.addTaintVariable("r2"); // length
+            			Logger.print("tainting call to " + addr);
+            			return true;
+            		}
+            	}
+            case "b":
                 return false;
 
             case "bne":
