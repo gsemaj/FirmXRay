@@ -145,9 +145,10 @@ public class Main {
 
         System.out.println("\n------------------ Starting Analysis ----------------\n");
         startTimeoutWatcher(Constant.TIMEOUT); // set timeout
-        start();
+        boolean solved = start();
         // getBase(programName);
         System.out.println("\n----------------- Ending Analysis ----------------\n");
+        System.out.println("solved: " + solved);
 
 
         // Release Program
@@ -157,12 +158,14 @@ public class Main {
         ghidraProject.setDeleteOnClose(true);
         ghidraProject.close();
 
+        if(!solved) System.exit(1);
     }
 
-    private static void start() {
+    private static boolean start() {
 
+    	boolean solved = false;
+    	
         // create address mapping
-
         Map<Integer, List<Address>> apis;
         if (Constant.MCU.equals("Nordic"))
             apis = FunctionUtil.locate_nordic(program);
@@ -171,8 +174,8 @@ public class Main {
 
         // solve all STR instructions
         // enabled when analyzing Nordic firmware because TI ones do not have many dependency on global vars
-        if (Constant.MCU.equals("Nordic"))
-            STRInsSolver.solveAllSTRIns(program);
+        //if (Constant.MCU.equals("Nordic"))
+        //    STRInsSolver.solveAllSTRIns(program);
 
         long pathNum = 0;
 
@@ -206,10 +209,14 @@ public class Main {
 
                     // JSONObject r = engine.outputResult();
                     JSONObject r = ResultProcessor.ProcessResult(program, api, engine);
-                    if (!JSONUtil.contains(jsonArray, r))
+                    if (!JSONUtil.contains(jsonArray, r) && r.getBoolean("Solved"))
                         jsonArray.put(r);
                 }
             }
+            
+            if(jsonArray.length() > 0)
+            	solved = true;
+            
             result.put(StringUtil.getAPIName(api), jsonArray);
         }
 
@@ -221,6 +228,8 @@ public class Main {
 
         // finish all apis
         Logger.printOutput(result.toString(4));
+        
+        return solved;
     }
 
     private static void getBase(Program program, String tag) throws
