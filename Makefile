@@ -29,7 +29,7 @@ clean:
     rm $(JAR_PKG)
 
 run:
-	$(JAVA) -cp out:lib/ghidra.jar:lib/json.jar $(MAIN) $(PATH) $(MCU)
+	$(JAVA) -cp out:lib/ghidra.jar:lib/json.jar $(MAIN) $(BINPATH) $(MCU)
 	
 jar:
 	$(JAR) -cp "lib/*" cvfe $(JAR_PKG) $(MAIN) -C out .
