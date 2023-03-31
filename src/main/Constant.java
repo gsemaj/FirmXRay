@@ -7,7 +7,7 @@ public class Constant {
 
     // config
     public final static String DIRECTORY_NAME = ".tmp";
-    public final static int MAX_CYCLE_DIVE = 20;
+    public final static int MAX_CYCLE_DIVE = 30;
     public final static int MAX_ITERATION = 3;
     public final static int TIMEOUT = 50000;
     public final static int DISASSEMBLE_TIMEOUT = 30;
