@@ -95,7 +95,10 @@ public class ExecutionPathFinder {
     public static void dfsSearchPath(Program program, Address startAddress, ExecutionPath currentPath, CodeBlock currentBlock, List<Integer> history) {
 
         if (history.size() >= Constant.MAX_CYCLE_DIVE) {
-        	Logger.printE("Max cycles exceeded");
+        	return;
+        }
+        
+        if(paths.size() >= Constant.MAX_PATH_COUNT) {
         	return;
         }
 
