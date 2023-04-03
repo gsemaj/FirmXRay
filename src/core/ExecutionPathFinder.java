@@ -84,7 +84,12 @@ public class ExecutionPathFinder {
 
                 for (CodeBlockReference block : parentBlocks) {
                     Logger.print("Block: " + initialBlock.getName() + " -> " + block.getSourceBlock().getName());
-                    dfsSearchPath(program, block.getReferent(), tempPath.clone(), block.getSourceBlock(), new ArrayList<>(history));
+                    List<SearchParams> searches = new ArrayList<SearchParams>();
+                    searches.add(new SearchParams(program, block.getReferent(), tempPath.clone(), block.getSourceBlock(), new ArrayList<>(history)));
+                    while(!searches.isEmpty()) {
+                    	SearchParams search = searches.remove(0);
+                    	searches.addAll(bfsSearchPath(search));
+                    }
                 }
             }
         }
@@ -92,53 +97,54 @@ public class ExecutionPathFinder {
         return paths;
     }
 
-    public static void dfsSearchPath(Program program, Address startAddress, ExecutionPath currentPath, CodeBlock currentBlock, List<Integer> history) {
+    public static List<SearchParams> bfsSearchPath(SearchParams params) {
 
-        if (history.size() >= Constant.MAX_CYCLE_DIVE) {
-        	return;
+    	List<SearchParams> branches = new ArrayList<SearchParams>();
+        if (params.history.size() >= Constant.MAX_CYCLE_DIVE) {
+        	return branches;
         }
         
         if(paths.size() >= Constant.MAX_PATH_COUNT) {
-        	return;
+        	return branches;
         }
 
         Listing listing = program.getListing();
-        CodeUnitIterator codeUnitIterator = listing.getCodeUnits(currentBlock, true);
+        CodeUnitIterator codeUnitIterator = listing.getCodeUnits(params.currentBlock, true);
 
         // Logger.print(String.format("Current Block: %s %d", currentBlock.toString(), currentBlock.hashCode()) );
 
         // Iterate and add all instructions to path in the current block
         List<Instruction> temp = new ArrayList<>();
         for(CodeUnit unit: codeUnitIterator) {
-            if (unit.getAddress().compareTo(startAddress) > 0) {
+            if (unit.getAddress().compareTo(params.startAddress) > 0) {
                 break;
             }
             temp.add(listing.getInstructionAt(unit.getAddress()));
         }
         for(int i=temp.size()-1; i>=0; --i) {
         	Instruction inst = temp.get(i);
-            if (taintDecision(inst, currentPath)) {
-                currentPath.addInst(inst);
-                if (currentPath.isTaintFinish()) { // no taint variable left
-                    if(!paths.contains(currentPath)) {
-                    	paths.add(currentPath);
-                    	return;
+            if (taintDecision(inst, params.currentPath)) {
+            	params.currentPath.addInst(inst);
+                if (params.currentPath.isTaintFinish()) { // no taint variable left
+                    if(!paths.contains(params.currentPath)) {
+                    	paths.add(params.currentPath);
+                    	return branches;
                     }
                 }
             }
         }
 
         // current block ends, jump to next blocks
-        List<CodeBlockReference> parentBlocks = BlockUtil.getPreviousBlocks(currentBlock);
+        List<CodeBlockReference> parentBlocks = BlockUtil.getPreviousBlocks(params.currentBlock);
 
         if (parentBlocks == null || parentBlocks.size() == 0) {
             // search ends
-            paths.add(currentPath);
+            paths.add(params.currentPath);
         }
         else {
             for (CodeBlockReference block : parentBlocks) {
 
-                if (history.contains((int) block.getSourceAddress().getUnsignedOffset())) {
+                if (params.history.contains((int) block.getSourceAddress().getUnsignedOffset())) {
                     // encountering cycle block, remove it, search ends
                     // paths.add(currentPath);
                     continue;
@@ -150,12 +156,29 @@ public class ExecutionPathFinder {
 //                }
 
                 // record history, continue searching in next block
-                List<Integer> newHistory = new ArrayList<>(history);
+                List<Integer> newHistory = new ArrayList<>(params.history);
                 newHistory.add((int) block.getSourceAddress().getUnsignedOffset());
-                Logger.print("Block: " + currentBlock.getName() + " -> " + block.getSourceBlock().getName());
-                dfsSearchPath(program, block.getReferent(), currentPath.clone(), block.getSourceBlock(), newHistory);
+                Logger.print("Block: " + params.currentBlock.getName() + " -> " + block.getSourceBlock().getName());
+                branches.add(new SearchParams(program, block.getReferent(), params.currentPath.clone(), block.getSourceBlock(), newHistory));
             }
         }
+		return branches;
+    }
+    
+    public static class SearchParams {
+    	Program program;
+    	Address startAddress;
+    	ExecutionPath currentPath;
+    	CodeBlock currentBlock;
+    	List<Integer> history;
+    	
+    	public SearchParams(Program p, Address sa, ExecutionPath cp, CodeBlock cb, List<Integer> h) {
+    		program = p;
+    		startAddress = sa;
+    		currentPath = cp;
+    		currentBlock = cb;
+    		history = h;
+    	}
     }
 
     public static List<Instruction> diveIntoFunction(Address startAddress, Address endAddress) {
