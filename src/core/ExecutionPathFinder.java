@@ -136,8 +136,8 @@ public class ExecutionPathFinder {
             paths.add(currentPath);
         }
         else {
-            for (CodeBlockReference block : parentBlocks) {
-
+            for (int i = parentBlocks.size()-1; i >= 0; i--) {
+            	CodeBlockReference block = parentBlocks.get(i);
                 if (history.contains((int) block.getSourceAddress().getUnsignedOffset())) {
                     // encountering cycle block, remove it, search ends
                     // paths.add(currentPath);
